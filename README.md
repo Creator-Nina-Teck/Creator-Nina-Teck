@@ -2,7 +2,7 @@
 - 👀 I’m interested in ai and robotics
 - 🌱 I’m currently learning python and html
 - 💞️ I’m looking to collaborate on some ai projects meant to positively impact society.
-- 📫 How to reach me ...
+- 📫 You can reach me through my discord Nina_Teck or through my server ℕҽυɾ𝕒𝕝 N𝕖𝕩𝕦ʂ
 - 😄 Pronouns: she/her
 - ⚡ Fun fact: i am currently applying to philips academy, andover. I am from Nigeria.
 
