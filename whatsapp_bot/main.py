@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import sqlite3
@@ -22,60 +23,19 @@ ADMIN_BROADCAST_NUMBERS = [
 WEBHOOK_SECRET = os.getenv("WHATSAPP_WEBHOOK_SECRET", "")
 DAILY_POST_HOUR_UTC = int(os.getenv("DAILY_POST_HOUR_UTC", "7"))
 DB_PATH = Path(os.getenv("BOT_DB_PATH", "study_bot.db"))
+CONTENT_DIR = Path(os.getenv("BOT_CONTENT_DIR", "content"))
 
 app = FastAPI(title="WhatsApp Study Bot")
 
-DAILY_DROPS = {
-    "monday": {
-        "title": "📘 Mathematics Monday",
-        "topic": "Quadratic Equations",
-        "tip": "Factor first before using formula.",
-        "practice": ["Solve x² - 5x + 6 = 0", "Find roots of x² + x - 12 = 0"],
-    },
-    "tuesday": {
-        "title": "📘 Chemistry Tuesday",
-        "topic": "Balancing Equations",
-        "tip": "Balance metals first, oxygen last.",
-        "practice": ["__ + O2 -> Fe2O3", "C3H8 + O2 -> CO2 + H2O"],
-    },
-    "wednesday": {
-        "title": "📘 Physics Wednesday",
-        "topic": "Speed, Distance, Time",
-        "tip": "Always keep units consistent.",
-        "practice": ["A car covers 150km in 3h. Find speed.", "Find distance if v=20m/s for 30s."],
-    },
-}
 
-QUIZ_BANK = {
-    "chemistry": [
-        {
-            "q": "What is the valency of oxygen?",
-            "options": ["A) 1", "B) 2", "C) 3", "D) 4"],
-            "answer": "B",
-            "explain": "Oxygen needs 2 electrons to complete octet.",
-        }
-    ],
-    "math": [
-        {
-            "q": "If 2x + 3 = 11, x = ?",
-            "options": ["A) 3", "B) 4", "C) 5", "D) 6"],
-            "answer": "B",
-            "explain": "2x = 8, so x = 4.",
-        }
-    ],
-}
-
-RESOURCE_LIBRARY = {
-    "notes chemistry": "Chem notes: https://example.com/chem-notes.pdf",
-    "formula physics": "Physics formulas: https://example.com/physics-formula-sheet.pdf",
-    "waec pastquestions": "WAEC past questions: https://example.com/waec-past-questions",
-}
-
-REVISION_PROMPTS = [
-    "⚡ QUICK REVISION: What is the valency of oxygen?",
-    "⚡ QUICK REVISION: State one difference between speed and velocity.",
-    "⚡ QUICK REVISION: Expand (x + 3)(x - 2).",
-]
+def load_json(path: Path, default: Any) -> Any:
+    if not path.exists():
+        return default
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return default
 
 
 def db_conn() -> sqlite3.Connection:
@@ -179,15 +139,22 @@ def extract_incoming_message(payload: dict[str, Any]) -> tuple[str, str] | None:
         return None
 
 
-def format_daily_drop(day_name: str) -> str:
-    entry = DAILY_DROPS.get(day_name.lower(), DAILY_DROPS["monday"])
-    practice = "\n".join([f"{idx+1}. {q}" for idx, q in enumerate(entry["practice"])])
+def format_daily_drop(day_name: str, daily_drops: dict[str, Any]) -> str:
+    fallback = {
+        "title": "📘 Daily Study Drop",
+        "topic": "[TOPIC_PLACEHOLDER]",
+        "tip": "[MINI_TIP_PLACEHOLDER]",
+        "practice": ["[PRACTICE_QUESTION_1]", "[PRACTICE_QUESTION_2]"],
+        "challenge": "[CHALLENGE_PROMPT_PLACEHOLDER]",
+    }
+    entry = daily_drops.get(day_name.lower(), fallback)
+    practice = "\n".join([f"{idx+1}. {q}" for idx, q in enumerate(entry.get("practice", []))])
     return (
-        f"{entry['title']}\n"
-        f"Topic: {entry['topic']}\n"
-        f"Mini tip: {entry['tip']}\n"
+        f"{entry.get('title', fallback['title'])}\n"
+        f"Topic: {entry.get('topic', fallback['topic'])}\n"
+        f"Mini tip: {entry.get('tip', fallback['tip'])}\n"
         f"Practice:\n{practice}\n"
-        "Challenge: Explain one concept to a classmate today."
+        f"Challenge: {entry.get('challenge', fallback['challenge'])}"
     )
 
 
@@ -199,24 +166,29 @@ def build_help_thread_prompt(topic: str) -> str:
     )
 
 
-def handle_command(phone: str, text: str) -> str:
+def handle_command(phone: str, text: str, content: dict[str, Any]) -> str:
     lower = text.lower()
     mark_active(phone)
 
+    quiz_bank = content["quiz_bank"]
+    resource_library = content["resource_library"]
+    revision_prompts = content["revision_prompts"]
+    daily_drops = content["daily_drops"]
+
     if lower.startswith("/quiz"):
         parts = lower.split()
-        subject = parts[1] if len(parts) > 1 else "chemistry"
-        quiz_set = QUIZ_BANK.get(subject)
+        subject = parts[1] if len(parts) > 1 else "general"
+        quiz_set = quiz_bank.get(subject)
         if not quiz_set:
-            return "No quiz found for that subject yet. Try /quiz chemistry or /quiz math"
+            return "No quiz found yet for that subject. Update content/quizzes.json with your questions."
         q = random.choice(quiz_set)
         increment_stat(phone, "quizzes_completed")
-        options = "\n".join(q["options"])
+        options = "\n".join(q.get("options", ["[OPTION_A]", "[OPTION_B]", "[OPTION_C]", "[OPTION_D]"]))
         return (
             f"🧠 Timed Quiz ({subject.title()})\n"
-            f"{q['q']}\n{options}\n\n"
-            f"Answer: {q['answer']}\n"
-            f"Explanation: {q['explain']}"
+            f"{q.get('q', '[QUIZ_QUESTION_PLACEHOLDER]')}\n{options}\n\n"
+            f"Answer: {q.get('answer', '[ANSWER_PLACEHOLDER]')}\n"
+            f"Explanation: {q.get('explain', '[EXPLANATION_PLACEHOLDER]')}"
         )
 
     if lower.startswith("/help"):
@@ -229,29 +201,29 @@ def handle_command(phone: str, text: str) -> str:
 
     if lower.startswith("/notes") or lower.startswith("/formula") or lower.startswith("/waec"):
         command_key = lower[1:]
-        resource = RESOURCE_LIBRARY.get(command_key)
+        resource = resource_library.get(command_key)
         if resource:
             return f"📚 Resource:\n{resource}"
-        return "No resource matched exactly. Try: /notes chemistry, /formula physics, /waec pastquestions"
+        return "No resource matched yet. Update content/resources.json placeholders."
 
     if lower.startswith("/simple"):
         topic = text[7:].strip() or "this topic"
         return (
             f"🧒 Explain like SS1: {topic}\n"
-            "Think of chemistry like cooking. Ingredients are atoms. "
-            "A reaction is just rearranging ingredients to make something new."
+            "[SIMPLE_EXPLANATION_PLACEHOLDER]\n"
+            "Example: [SIMPLE_EXAMPLE_PLACEHOLDER]"
         )
 
     if lower.startswith("/revision"):
-        return random.choice(REVISION_PROMPTS)
+        return random.choice(revision_prompts) if revision_prompts else "[REVISION_PROMPT_PLACEHOLDER]"
 
     if lower.startswith("/remind"):
-        custom = text[7:].strip() or "WAEC Chemistry in 12 days. Today's focus: Organic Chemistry."
+        custom = text[7:].strip() or "[EXAM_NAME] in [X] days. Today's focus: [TOPIC]."
         return f"⏰ Study Reminder:\n{custom}"
 
     if lower.startswith("/daily"):
         weekday = datetime.now(UTC).strftime("%A").lower()
-        return format_daily_drop(weekday)
+        return format_daily_drop(weekday, daily_drops)
 
     return (
         "Hi 👋 I can help with study flow.\n"
@@ -311,7 +283,14 @@ async def receive_webhook(request: Request, x_hub_signature_256: str | None = He
     if not text:
         return {"ok": True}
 
-    reply = handle_command(sender, text)
+    content = {
+        "daily_drops": load_json(CONTENT_DIR / "daily_drops.json", {}),
+        "quiz_bank": load_json(CONTENT_DIR / "quizzes.json", {}),
+        "resource_library": load_json(CONTENT_DIR / "resources.json", {}),
+        "revision_prompts": load_json(CONTENT_DIR / "revision_prompts.json", []),
+    }
+
+    reply = handle_command(sender, text, content)
     await send_whatsapp_text(sender, reply)
     return {"ok": True}
 
@@ -321,7 +300,9 @@ async def broadcast_daily_drop() -> dict[str, Any]:
     if not ADMIN_BROADCAST_NUMBERS:
         return {"ok": False, "reason": "No WHATSAPP_ADMIN_NUMBERS configured"}
 
-    message = format_daily_drop(datetime.now(UTC).strftime("%A").lower())
+    daily_drops = load_json(CONTENT_DIR / "daily_drops.json", {})
+    message = format_daily_drop(datetime.now(UTC).strftime("%A").lower(), daily_drops)
+
     sent = 0
     for number in ADMIN_BROADCAST_NUMBERS:
         await send_whatsapp_text(number, message)
@@ -336,17 +317,3 @@ async def broadcast_daily_drop() -> dict[str, Any]:
     conn.close()
 
     return {"ok": True, "sent": sent}
-
-
-@app.get("/scheduler/status")
-async def scheduler_status() -> dict[str, Any]:
-    now = datetime.now(UTC)
-    conn = db_conn()
-    row = conn.execute("SELECT value FROM bot_state WHERE key = 'last_daily_broadcast_utc'").fetchone()
-    conn.close()
-    return {
-        "ok": True,
-        "daily_post_hour_utc": DAILY_POST_HOUR_UTC,
-        "last_daily_broadcast_utc": row["value"] if row else None,
-        "current_utc": now.isoformat(),
-    }

@@ -1,0 +1,22 @@
+{
+  "monday": {
+    "title": "📘 [SUBJECT] Monday",
+    "topic": "[TOPIC_PLACEHOLDER]",
+    "tip": "[MINI_TIP_PLACEHOLDER]",
+    "practice": [
+      "[PRACTICE_QUESTION_1]",
+      "[PRACTICE_QUESTION_2]"
+    ],
+    "challenge": "[CHALLENGE_PROMPT_PLACEHOLDER]"
+  },
+  "tuesday": {
+    "title": "📘 [SUBJECT] Tuesday",
+    "topic": "[TOPIC_PLACEHOLDER]",
+    "tip": "[MINI_TIP_PLACEHOLDER]",
+    "practice": [
+      "[PRACTICE_QUESTION_1]",
+      "[PRACTICE_QUESTION_2]"
+    ],
+    "challenge": "[CHALLENGE_PROMPT_PLACEHOLDER]"
+  }
+}
