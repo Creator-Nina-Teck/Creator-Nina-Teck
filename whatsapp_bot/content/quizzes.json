@@ -1,0 +1,28 @@
+{
+  "chemistry": [
+    {
+      "q": "[QUIZ_QUESTION_PLACEHOLDER]",
+      "options": [
+        "A) [OPTION_A]",
+        "B) [OPTION_B]",
+        "C) [OPTION_C]",
+        "D) [OPTION_D]"
+      ],
+      "answer": "[ANSWER_PLACEHOLDER]",
+      "explain": "[EXPLANATION_PLACEHOLDER]"
+    }
+  ],
+  "math": [
+    {
+      "q": "[QUIZ_QUESTION_PLACEHOLDER]",
+      "options": [
+        "A) [OPTION_A]",
+        "B) [OPTION_B]",
+        "C) [OPTION_C]",
+        "D) [OPTION_D]"
+      ],
+      "answer": "[ANSWER_PLACEHOLDER]",
+      "explain": "[EXPLANATION_PLACEHOLDER]"
+    }
+  ]
+}
