@@ -1,0 +1,106 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  color: #f4f6ff;
+  background: #0f1220;
+  line-height: 1.35;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+}
+
+.pet-card {
+  width: min(390px, 100%);
+  background: linear-gradient(170deg, #1b2140, #171a2f);
+  border: 1px solid #30385f;
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  display: grid;
+  gap: 10px;
+}
+
+.pet-header { display: flex; gap: 10px; align-items: center; }
+.title-wrap h1 { margin: 0; font-size: 1.2rem; letter-spacing: 0.01em; }
+.mood, .mode-label { margin: 3px 0 0; color: #b9c4ff; font-size: 0.88rem; }
+
+.avatar {
+  width: 66px;
+  height: 66px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 20% 20%, #6f7bf7, #39408f);
+  font-size: 31px;
+  animation: bob 2.2s ease-in-out infinite;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+button, input, select {
+  border-radius: 11px;
+  border: 1px solid #3b4672;
+  background: #242b4d;
+  color: #f4f6ff;
+  font-size: 0.9rem;
+}
+
+button {
+  padding: 10px 8px;
+  min-height: 44px;
+  touch-action: manipulation;
+  transition: transform 120ms ease, background-color 160ms ease;
+}
+
+button:active { transform: scale(0.98); }
+button.active { background: #5260c9; transform: translateY(-1px); }
+
+.response-box {
+  min-height: 92px;
+  background: #0f1330;
+  border: 1px solid #2f3c78;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 0.94rem;
+}
+
+.input-row { display: flex; gap: 8px; }
+.input-row input { flex: 1; padding: 11px; min-height: 44px; }
+.input-row button { padding: 10px 14px; }
+
+.settings-panel { margin-top: 2px; }
+.settings-grid { display: grid; gap: 8px; margin-top: 8px; }
+.settings-grid label { display: grid; gap: 5px; font-size: 0.84rem; }
+.reset-btn { margin-top: 4px; }
+
+.fade-in { animation: fadeIn 260ms ease; }
+.pop-in { animation: popIn 180ms ease; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  from { opacity: 0.7; transform: scale(0.99); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 390px) {
+  .mode-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
