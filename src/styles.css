@@ -1,0 +1,28 @@
+:root { font-family: Inter, system-ui, sans-serif; color: #f3f3f3; background: #090b16; }
+* { box-sizing: border-box; }
+body { margin: 0; display: grid; place-items: center; min-height: 100vh; }
+.app-shell { width: min(430px, 100vw); padding: 12px; display: grid; gap: 10px; border: 1px solid #2c3568; border-radius: 18px; background: linear-gradient(180deg,#0e1122,#0b0f1f); }
+.top-status { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #121833; border-radius: 12px; padding: 10px; }
+h1 { margin: 0; font-size: 1.2rem; }
+small { color: #bcc6ff; }
+.ghost { background: transparent; border: 1px solid #7a7ea8; color: #e4e7ff; border-radius: 999px; padding: 8px 12px; min-height: 42px; }
+.pet-card { display: grid; gap: 10px; background: #181d3b; border-radius: 14px; padding: 12px; animation: bob 2s infinite ease-in-out; transition: all .2s ease; }
+.avatar { font-size: 2.1rem; width: 64px; height: 64px; display: grid; place-items: center; background: #2d3567; border-radius: 16px; box-shadow: 0 0 0 2px #3f4ca0 inset; }
+.bubble { min-height: 64px; padding: 12px; background: #0e1330; border: 1px solid #36448b; border-radius: 12px; line-height: 1.4; }
+.mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.mode-grid button, .input-row button { min-height: 46px; border: 1px solid #38458d; border-radius: 12px; background: #1b2350; color: #fff; font-weight: 700; }
+.mode-grid .active { outline: 2px solid #8bdcff; background: #354193; transform: translateY(-1px); }
+.memory-strip { background: #10152f; border-radius: 12px; padding: 10px; }
+.memory-strip p { margin: 0 0 6px; color: #9eb0ff; font-size: .82rem; }
+.memory-strip div { display: flex; gap: 6px; flex-wrap: wrap; }
+.memory-strip span { padding: 6px 8px; background: #1a224d; border-radius: 999px; font-size: .75rem; }
+.input-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+input, select { width: 100%; border: 1px solid #566; border-radius: 10px; background: #0e122a; color: #f2f2f2; padding: 12px; min-height: 46px; }
+.settings-backdrop { position: fixed; inset: 0; background: rgb(0 0 0 / .5); display: grid; place-items: center; }
+.settings-panel { width: min(380px, 90vw); background: #1d2246; border-radius: 16px; padding: 16px; display: grid; gap: 10px; }
+.settings-panel label { display: grid; gap: 6px; font-size: .9rem; }
+.mood-happy { background: #123930; }
+.mood-suspicious { background: #3c2f15; }
+.mood-annoyed { background: #3b1b29; }
+.mood-curious { background: #233b15; }
+@keyframes bob { 0%,100% { transform: translateY(0px);} 50% { transform: translateY(-2px);} }
